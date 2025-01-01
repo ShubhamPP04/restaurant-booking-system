@@ -1,22 +1,41 @@
 import { NextResponse } from 'next/server'
+import fs from 'fs'
+import path from 'path'
 
-interface Booking {
-  id: string;
-  date: string;
-  time: string;
-  name: string;
-  email: string;
-  guests: number;
+const BOOKINGS_FILE = path.join(process.cwd(), 'data', 'bookings.json')
+
+const getBookings = () => {
+  try {
+    if (fs.existsSync(BOOKINGS_FILE)) {
+      const data = fs.readFileSync(BOOKINGS_FILE, 'utf8')
+      return JSON.parse(data)
+    }
+    return []
+  } catch (err) {
+    console.error('Error loading bookings:', err)
+    return []
+  }
 }
 
-const bookings: Booking[] = []
+const saveBookings = (bookings: any[]) => {
+  try {
+    const dir = path.dirname(BOOKINGS_FILE)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    fs.writeFileSync(BOOKINGS_FILE, JSON.stringify(bookings, null, 2))
+  } catch (err) {
+    console.error('Error saving bookings:', err)
+  }
+}
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const booking = bookings.find(b => b.id === params.id)
+    const bookings = getBookings()
+    const booking = bookings.find((b: any) => b.id === params.id)
 
     if (!booking) {
       return NextResponse.json(
@@ -26,22 +45,21 @@ export async function GET(
     }
 
     return NextResponse.json(booking)
-  } catch (err) {
-    console.error('Error fetching booking:', err)
+  } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to fetch booking' },
+      { error: 'Failed to get booking' },
       { status: 500 }
     )
   }
 }
 
-export async function PUT(
+export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const updatedBooking: Booking = await request.json()
-    const index = bookings.findIndex(b => b.id === params.id)
+    const bookings = getBookings()
+    const index = bookings.findIndex((b: any) => b.id === params.id)
 
     if (index === -1) {
       return NextResponse.json(
@@ -50,12 +68,13 @@ export async function PUT(
       )
     }
 
-    bookings[index] = { ...bookings[index], ...updatedBooking }
-    return NextResponse.json(bookings[index])
-  } catch (err) {
-    console.error('Error updating booking:', err)
+    bookings.splice(index, 1)
+    saveBookings(bookings)
+
+    return NextResponse.json({ message: 'Booking deleted successfully' })
+  } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to update booking' },
+      { error: 'Failed to delete booking' },
       { status: 500 }
     )
   }
