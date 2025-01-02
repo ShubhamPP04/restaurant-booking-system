@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
-
 interface Props {
   selectedDate: string
   onDateSelect: (date: string) => void
@@ -14,11 +12,12 @@ interface Availability {
   date: string
   hasSlots: boolean
   availableSlots: number
+  availableTimes: string[]
 }
 
 export default function Calendar({ selectedDate, onDateSelect }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [availability, setAvailability] = useState<Availability[]>([])
+  const [availabilities, setAvailabilities] = useState<Availability[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -32,26 +31,20 @@ export default function Calendar({ selectedDate, onDateSelect }: Props) {
         const endDate = endOfMonth(currentMonth)
 
         console.log('Fetching availability:', {
-          API_URL,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString()
         })
 
         const response = await fetch(
-          `${API_URL}/api/availability?start=${startDate.toISOString().split('T')[0]}&end=${endDate.toISOString().split('T')[0]}`,
+          `/api/availability?start=${startDate.toISOString().split('T')[0]}&end=${endDate.toISOString().split('T')[0]}`,
           {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
-            },
-            cache: 'no-cache',
-            mode: 'cors'
+            }
           }
         )
-
-        console.log('Response status:', response.status)
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()))
 
         if (!response.ok) {
           let errorMessage = 'Failed to fetch availability'
@@ -66,7 +59,7 @@ export default function Calendar({ selectedDate, onDateSelect }: Props) {
 
         const data = await response.json()
         console.log('Received availability data:', data)
-        setAvailability(data)
+        setAvailabilities(data)
       } catch (err) {
         console.error('Error fetching availability:', err)
         setError(err instanceof Error ? err.message : 'Failed to load availability')
@@ -101,21 +94,20 @@ export default function Calendar({ selectedDate, onDateSelect }: Props) {
 
   const isDateAvailable = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0]
-    const availabilityInfo = availability.find(a => a.date === dateStr)
-    return availabilityInfo?.hasSlots || false
+    const availability = availabilities.find(a => a.date === dateStr)
+    return availability?.hasSlots || false
   }
 
   const getAvailableSlots = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0]
-    const availabilityInfo = availability.find(a => a.date === dateStr)
-    return availabilityInfo?.availableSlots || 0
+    const availability = availabilities.find(a => a.date === dateStr)
+    return availability?.availableSlots || 0
   }
 
   if (error) {
     return (
       <div className="p-4 bg-red-50 border border-red-100 rounded-lg">
         <p className="text-sm text-red-600">{error}</p>
-        <p className="text-xs text-gray-500 mt-1">API URL: {API_URL}</p>
       </div>
     )
   }
@@ -170,10 +162,10 @@ export default function Calendar({ selectedDate, onDateSelect }: Props) {
                 relative p-3 w-full aspect-square flex flex-col items-center justify-center
                 rounded-lg transition-all duration-200
                 ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-900'}
-                ${isSelected ? 'bg-blue-500 text-white' : ''}
-                ${!isSelected && isCurrentMonth && available ? 'hover:bg-gray-100' : ''}
+                ${isSelected ? 'bg-emerald-500 text-white' : ''}
+                ${!isSelected && isCurrentMonth && available ? 'hover:bg-emerald-50' : ''}
                 ${loading ? 'cursor-wait' : !available ? 'cursor-not-allowed' : ''}
-                ${isCurrentDay ? 'border-2 border-blue-500' : ''}
+                ${isCurrentDay ? 'border-2 border-emerald-500' : ''}
               `}
             >
               <span className={`text-sm ${isSelected ? 'font-bold' : ''}`}>
@@ -186,7 +178,7 @@ export default function Calendar({ selectedDate, onDateSelect }: Props) {
               )}
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
             </button>

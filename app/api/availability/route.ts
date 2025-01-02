@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { eachDayOfInterval, format } from 'date-fns';
 
 const BOOKINGS_FILE = path.join(process.cwd(), 'data', 'bookings.json');
 
@@ -34,24 +35,37 @@ const AVAILABLE_TIMES = [
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-    const date = searchParams.get('date');
+    const start = searchParams.get('start');
+    const end = searchParams.get('end');
 
-    if (!date) {
-      return NextResponse.json({ error: 'Date parameter is required' }, { status: 400 });
+    if (!start || !end) {
+      return NextResponse.json({ error: 'Start and end dates are required' }, { status: 400 });
     }
 
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const daysInRange = eachDayOfInterval({ start: startDate, end: endDate });
+
     const bookings = getBookings();
-    const bookedTimes = bookings
-      .filter((booking: any) => booking.date === date)
-      .map((booking: any) => booking.time);
+    const availability = daysInRange.map(date => {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const bookedTimes = bookings
+        .filter((booking: any) => booking.date === dateStr)
+        .map((booking: any) => booking.time);
 
-    const availableTimes = AVAILABLE_TIMES.filter(time => !bookedTimes.includes(time));
+      const availableTimes = AVAILABLE_TIMES.filter(time => !bookedTimes.includes(time));
 
-    return NextResponse.json({
-      date,
-      availableTimes
+      return {
+        date: dateStr,
+        hasSlots: availableTimes.length > 0,
+        availableSlots: availableTimes.length,
+        availableTimes
+      };
     });
+
+    return NextResponse.json(availability);
   } catch (error) {
+    console.error('Error getting availability:', error);
     return NextResponse.json({ error: 'Failed to get availability' }, { status: 500 });
   }
 } 

@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
-
 interface Props {
   selectedDate: string
   selectedTime: string
@@ -40,14 +38,12 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
         setError('')
 
         console.log('Fetching bookings for date:', selectedDate)
-        const response = await fetch(`${API_URL}/api/bookings?date=${selectedDate}`, {
+        const response = await fetch(`/api/bookings?date=${selectedDate}`, {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
-          method: 'GET',
-          cache: 'no-cache',
-          mode: 'cors'
+          method: 'GET'
         })
 
         console.log('Response status:', response.status)
@@ -149,7 +145,7 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
     return (
       <div className="flex items-center justify-center p-12">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
           <p className="text-sm text-gray-600 animate-pulse">Loading available time slots...</p>
         </div>
       </div>
@@ -177,7 +173,7 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-green-500 shadow-sm"></span>
+            <span className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-sm"></span>
             <span className="text-sm font-medium text-gray-600">Available</span>
           </div>
           <div className="flex items-center gap-2">
@@ -185,7 +181,7 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
             <span className="text-sm font-medium text-gray-600">Booked</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-sm"></span>
+            <span className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 shadow-sm"></span>
             <span className="text-sm font-medium text-gray-600">Selected</span>
           </div>
         </div>
@@ -206,11 +202,11 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
           <div key={title} className="space-y-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 {title}
               </h3>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
                   {stats.available} available
                 </span>
                 <span className="text-xs font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
@@ -235,10 +231,10 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
                       ${isBooked 
                         ? 'bg-gray-50 border-2 border-gray-200 text-gray-400 cursor-not-allowed'
                         : isSelected 
-                          ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] border-2 border-transparent' 
-                          : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-md active:scale-[0.98] hover:bg-indigo-50/30'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] border-2 border-transparent' 
+                          : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-emerald-500 hover:text-emerald-600 hover:shadow-md active:scale-[0.98] hover:bg-emerald-50/30'
                       }
-                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
                       group
                     `}
                   >
@@ -247,7 +243,7 @@ export default function TimeSlots({ selectedDate, selectedTime, onTimeSelect }: 
                         {formatTime(time)}
                       </span>
                       {!isBooked && !isSelected && (
-                        <span className="text-[10px] text-gray-500 group-hover:text-indigo-500">
+                        <span className="text-[10px] text-gray-500 group-hover:text-emerald-500">
                           Available
                         </span>
                       )}
