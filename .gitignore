@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/server/node_modules
 /.pnp
 .pnp.js
 
@@ -14,6 +15,8 @@
 
 # production
 /build
+/server/build
+/server/dist
 
 # misc
 .DS_Store
@@ -23,9 +26,13 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/server/npm-debug.log*
+/server/yarn-debug.log*
+/server/yarn-error.log*
 
 # local env files
 .env*.local
+/server/.env*
 
 # vercel
 .vercel
@@ -38,7 +45,7 @@ next-env.d.ts
 .idea
 .vscode
 
-# Keep data directory but ignore its contents
-!data/
-data/*
-!data/bookings.json
+# Server data
+/server/data/*
+!/server/data
+!/server/data/.gitkeep
