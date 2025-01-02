@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function BookingConfirmation() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -10,12 +12,12 @@ export default function BookingConfirmation() {
             Thank you for choosing our restaurant. Your booking has been confirmed.
           </p>
           <div className="inline-flex items-center justify-center">
-            <a
+            <Link
               href="/"
               className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
             >
               Return to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

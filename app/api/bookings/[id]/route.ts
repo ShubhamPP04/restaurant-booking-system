@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 
@@ -29,13 +29,19 @@ const saveBookings = (bookings: any[]) => {
   }
 }
 
+type RouteParams = {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteParams
 ) {
   try {
     const bookings = getBookings()
-    const booking = bookings.find((b: any) => b.id === params.id)
+    const booking = bookings.find((b: any) => b.id === context.params.id)
 
     if (!booking) {
       return NextResponse.json(
@@ -54,12 +60,12 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteParams
 ) {
   try {
     const bookings = getBookings()
-    const index = bookings.findIndex((b: any) => b.id === params.id)
+    const index = bookings.findIndex((b: any) => b.id === context.params.id)
 
     if (index === -1) {
       return NextResponse.json(
