@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -15,7 +15,7 @@ interface Booking {
   createdAt: string
 }
 
-export default function BookingConfirmation() {
+function BookingDetails() {
   const searchParams = useSearchParams()
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
@@ -243,5 +243,23 @@ export default function BookingConfirmation() {
         }
       `}</style>
     </div>
+  )
+}
+
+// Main component with Suspense boundary
+export default function BookingConfirmation() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <BookingDetails />
+    </Suspense>
   )
 } 

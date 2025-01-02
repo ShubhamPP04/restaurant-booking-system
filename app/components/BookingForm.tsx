@@ -9,6 +9,17 @@ interface ValidationErrors {
   [key: string]: string
 }
 
+const inputClasses = (error?: string) => `
+  block w-full px-4 py-3 rounded-xl border 
+  ${error ? 'border-red-500' : 'border-gray-300'} 
+  shadow-sm 
+  focus:ring-2 
+  focus:ring-emerald-500 
+  focus:border-emerald-500 
+  transition-colors 
+  duration-200
+`
+
 export default function BookingForm() {
   const router = useRouter()
   const [formData, setFormData] = useState({
@@ -159,9 +170,7 @@ export default function BookingForm() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className={`block w-full px-4 py-3 rounded-lg border ${
-                  validationErrors.name ? 'border-red-500' : 'border-gray-300'
-                } shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200`}
+                className={inputClasses(validationErrors.name)}
                 placeholder="Enter your name"
               />
               {validationErrors.name && (
@@ -178,9 +187,7 @@ export default function BookingForm() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`block w-full px-4 py-3 rounded-lg border ${
-                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
-                } shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200`}
+                className={inputClasses(validationErrors.email)}
                 placeholder="you@example.com"
               />
               {validationErrors.email && (
@@ -197,9 +204,7 @@ export default function BookingForm() {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className={`block w-full px-4 py-3 rounded-lg border ${
-                  validationErrors.phone ? 'border-red-500' : 'border-gray-300'
-                } shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200`}
+                className={inputClasses(validationErrors.phone)}
                 placeholder="Your phone number"
               />
               {validationErrors.phone && (
@@ -218,9 +223,7 @@ export default function BookingForm() {
                 max="10"
                 value={formData.guests}
                 onChange={handleChange}
-                className={`block w-full px-4 py-3 rounded-lg border ${
-                  validationErrors.guests ? 'border-red-500' : 'border-gray-300'
-                } shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200`}
+                className={inputClasses(validationErrors.guests)}
               />
               {validationErrors.guests && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.guests}</p>
