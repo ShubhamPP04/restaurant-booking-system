@@ -1,49 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 
 const BOOKINGS_FILE = path.join(process.cwd(), 'data', 'bookings.json')
 
-const getBookings = () => {
+async function getBookings() {
   try {
-    if (fs.existsSync(BOOKINGS_FILE)) {
-      const data = fs.readFileSync(BOOKINGS_FILE, 'utf8')
-      return JSON.parse(data)
-    }
-    return []
+    const data = await fs.readFile(BOOKINGS_FILE, 'utf8')
+    return JSON.parse(data)
   } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      // If file doesn't exist, create it with empty array
+      await fs.mkdir(path.dirname(BOOKINGS_FILE), { recursive: true })
+      await fs.writeFile(BOOKINGS_FILE, '[]')
+      return []
+    }
     console.error('Error loading bookings:', err)
     return []
   }
 }
 
-const saveBookings = (bookings: any[]) => {
+async function saveBookings(bookings: any[]) {
   try {
-    const dir = path.dirname(BOOKINGS_FILE)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(BOOKINGS_FILE, JSON.stringify(bookings, null, 2))
+    await fs.mkdir(path.dirname(BOOKINGS_FILE), { recursive: true })
+    await fs.writeFile(BOOKINGS_FILE, JSON.stringify(bookings, null, 2))
   } catch (err) {
     console.error('Error saving bookings:', err)
-  }
-}
-
-type RouteParams = {
-  params: {
-    id: string
+    throw err
   }
 }
 
 export async function GET(
   request: NextRequest,
-  context: RouteParams
+  { params }: { params: { id: string } }
 ) {
   try {
-    const bookings = getBookings()
-    const booking = bookings.find((b: any) => b.id === context.params.id)
+    const bookings = await getBookings()
+    const booking = bookings.find((b: any) => b.id === params.id)
 
     if (!booking) {
+      console.log('Booking not found:', params.id)
       return NextResponse.json(
         { error: 'Booking not found' },
         { status: 404 }
@@ -52,6 +48,7 @@ export async function GET(
 
     return NextResponse.json(booking)
   } catch (error) {
+    console.error('Error getting booking:', error)
     return NextResponse.json(
       { error: 'Failed to get booking' },
       { status: 500 }
@@ -61,11 +58,11 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  context: RouteParams
+  { params }: { params: { id: string } }
 ) {
   try {
-    const bookings = getBookings()
-    const index = bookings.findIndex((b: any) => b.id === context.params.id)
+    const bookings = await getBookings()
+    const index = bookings.findIndex((b: any) => b.id === params.id)
 
     if (index === -1) {
       return NextResponse.json(
@@ -75,10 +72,11 @@ export async function DELETE(
     }
 
     bookings.splice(index, 1)
-    saveBookings(bookings)
+    await saveBookings(bookings)
 
     return NextResponse.json({ message: 'Booking deleted successfully' })
   } catch (error) {
+    console.error('Error deleting booking:', error)
     return NextResponse.json(
       { error: 'Failed to delete booking' },
       { status: 500 }

@@ -37,3 +37,8 @@ next-env.d.ts
 # IDE
 .idea
 .vscode
+
+# Keep data directory but ignore its contents
+!data/
+data/*
+!data/bookings.json
